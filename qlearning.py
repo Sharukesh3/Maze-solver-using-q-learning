@@ -7,13 +7,17 @@ import requests
 import gym
 import gym_maze
 
-# Define the ESP32 server address (replace with the actual IP address of your ESP32)
-ESP32_SERVER_URL = "http://192.168.222.8/direction"
+# Define the ESP32's IP address and port
+ESP32_IP_ADDRESS = "192.168.222.8"
+ESP32_PORT = 80
 
 # Function to send direction to ESP32
 def send_direction_to_esp32(direction):
     try:
-        response = requests.post(ESP32_SERVER_URL, data={'dir': direction})
+        # Construct the URL for the ESP32
+        url = f"http://{ESP32_IP_ADDRESS}:{ESP32_PORT}/direction"
+        # Send the direction as a POST request
+        response = requests.post(url, data={'dir': direction})
         if response.status_code == 200:
             print(f"Direction {direction} sent successfully")
         else:
@@ -140,6 +144,7 @@ def simulate():
     current_orientation = 0  # Start facing North
 
     previous_direction = None
+    continuous_forward = False
 
     while not d:
         action = int(np.argmax(Q[s]))
@@ -154,9 +159,12 @@ def simulate():
             print(f"Step {time}: {direction} ({s})")
             send_direction_to_esp32(direction)
             previous_direction = direction
+            continuous_forward = False
         else:
-            print(f"Step {time}: F ({s})")
-            send_direction_to_esp32('F')
+            if direction == 'F' and not continuous_forward:
+                print(f"Step {time}: F ({s})")
+                send_direction_to_esp32('F')
+                continuous_forward = True
 
         # Update orientation based on the action
         if direction == 'R':
