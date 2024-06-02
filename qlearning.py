@@ -5,7 +5,7 @@ import random
 import time as tm
 import gym
 import gym_maze
-env = gym.make("maze-random-10x10-v0")
+env = gym.make("maze-sample-5x5-v0")
 MAZE_SIZE = tuple((env.observation_space.high + np.ones(env.observation_space.shape)).astype(int))
 NUM_BUCKETS = MAZE_SIZE  # one bucket per grid
 MIN_EXPLORE_RATE = 0.001
@@ -109,24 +109,58 @@ def train():
             break
 
 def simulate():
-    obv=env.reset()
-    s=state_to_bucket(obv)
-    d=False
-    reward=0
-    time=0
+    obv = env.reset()
+    s = state_to_bucket(obv)
+    d = False
+    reward = 0
+    time = 0
     env.render()
     tm.sleep(2)
-    while(not d):
+
+    action_map = {
+        0: 'F',  # Forward
+        1: 'R',  # Right
+        2: 'B',  # Backward
+        3: 'L'   # Left
+    }
+
+    # Track the agent's orientation
+    orientations = ['N', 'E', 'S', 'W']
+    current_orientation = 0  # Start facing North
+
+    previous_direction = None
+
+    while not d:
         action = int(np.argmax(Q[s]))
-        obv,r1,d,_=env.step(action)
+        obv, r1, d, _ = env.step(action)
         env.render()
         tm.sleep(2)
-        s1=state_to_bucket(obv)
-        s=s1
-        reward+=r1
-        time+=1
-    print("Simulation ended at time %d with total reward = %f."
-          % (time, reward))
+
+        direction = action_map[action]
+
+        # Determine if the action is a change in direction
+        if previous_direction is None or direction != 'F' and direction != previous_direction:
+            print(f"Step {time}: {direction} ({s})")
+            previous_direction = direction
+        else:
+            print(f"Step {time}: F ({s})")
+
+        # Update orientation based on the action
+        if direction == 'R':
+            current_orientation = (current_orientation + 1) % 4
+        elif direction == 'L':
+            current_orientation = (current_orientation - 1) % 4
+        elif direction == 'B':
+            current_orientation = (current_orientation + 2) % 4
+
+        s1 = state_to_bucket(obv)
+        s = s1
+        reward += r1
+        time += 1
+
+    print(f"Simulation ended at time {time} with total reward = {reward}.")
+
+
 
 
 train()
