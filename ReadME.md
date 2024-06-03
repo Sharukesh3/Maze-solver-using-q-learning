@@ -1,4 +1,5 @@
 # Maze-Solver Using Q-Learning
+![mazeSolver](https://github.com/Sharukesh3/Maze-solver-using-q-learning/assets/161855868/25325a17-79af-4d0a-ba78-a3f337318aa3)
 
 ## Overview
 Welcome to the Maze-Solver Robot project! This project leverages reinforcement learning, specifically Q-learning, to navigate and solve mazes. The learning algorithm runs on a laptop, which sends instructions to the robot in real-time. The robot then moves accordingly to solve the maze.
